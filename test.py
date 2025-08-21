@@ -79,10 +79,10 @@ def scrape_internship():
                 print("Reached the end of the list.")
                 break
 
-            # # --- Final Code ✅ ---
-            # # Execute JS to scroll the specific container down by its own height
-            # scroll_container.evaluate("node => node.scrollTop += node.clientHeight")
-            # page.wait_for_timeout(1500)  # Wait for new rows to render
+            # --- Final Code ✅ ---
+            # Execute JS to scroll the specific container down by its own height
+            scroll_container.evaluate("node => node.scrollTop += node.clientHeight")
+            page.wait_for_timeout(1500)  # Wait for new rows to render
 
         browser.close()
         return internships
