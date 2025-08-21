@@ -1,0 +1,33 @@
+name: Run Internship Scraper
+
+on:
+  schedule:
+    # This runs the script every 4 hours
+    - cron: '0 */4 * * *'
+  workflow_dispatch: # This adds a button to run it manually on GitHub
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: |
+          playwright install --with-deps chromium
+
+      - name: Run the scraper script
+        env:
+          MY_EMAIL_ADDRESS: ${{ secrets.MY_EMAIL_ADDRESS }}
+          MY_EMAIL_APP_PASSWORD: ${{ secrets.MY_EMAIL_APP_PASSWORD }}
+        run: python main.py
