@@ -91,7 +91,7 @@ def scrape_internship():
 def filter_for_matches(internships):
     my_matches = []
     WANTED_GRAD_TIMES = ["2027-December", "2028", "2028-Spring", "2028-Summer", "N/A", "2027-Winter"]
-    WANTED_HIRE_TIMES = ["2026-Summer", "Summer", "2026-May", "2026-June", "2026-July", "N/A", "2025-Summer", "2025", "2024-Summer", "2024]
+    WANTED_HIRE_TIMES = ["2026-Summer", "Summer", "2026-May", "2026-June", "2026-July", "N/A", "2025-Summer", "2025", "2024-Summer", "2024"]
 
     for job in internships:
         grad_time_match = job["grad_time"] in WANTED_GRAD_TIMES
