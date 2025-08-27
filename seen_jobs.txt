@@ -452,3 +452,7 @@ Software Developer Intern - Summer 2026-AtkinsRéalis
 Summer 2026 Application Development Intern-F.N.B. Corporation
 AI SWE Intern Summer 2026-Fresco (YC F24)
 Software Test Engineer Intern-Legrand, North America
+Embedded Software Intern-Analog Devices
+Full Stack Engineering Intern (Summer 2026)-Ember
+Forward Deployed Software Engineering Intern-Relixir (YC X25)
+Software Engineer Intern - Backend & AI-Relixir (YC X25)
