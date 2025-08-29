@@ -519,3 +519,4 @@ Dynamics 365 CRM Engineering Associate - Summer 2026 Internship Program-Heartlan
 Backend Intern (Golang)-Hapi App
 Part Time Student - Software Engineering - Champaign, IL-Conexant
 Cloud Infrastructure Engineering Associate - Summer 2026 Internship Program-Heartland Business Systems, Inc.
+Summer Intern, Embedded Software Engineer-Cirrus Logic
