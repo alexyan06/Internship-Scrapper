@@ -559,3 +559,8 @@ IS intern-ABB
 2026 PhD Software Engineering Intern-AMD
 Full Stack Engineering Internship (Summer 2026)-Cuckoo
 Summer 2026: Member of Technical Staff-Andon Labs
+Quality Assurance Analyst Intern-Oigetit.ai - Fake News Filter
+2026 Charles Schwab Technology Intern - Software Engineering-Charles Schwab
+Web Quality Assurance Intern-Oigetit.ai - Fake News Filter
+Senior Software Engineer Intern-Market Leader Technologies
+3D Web Development Intern (Three.js / 3D Editing)-Vicino AI
