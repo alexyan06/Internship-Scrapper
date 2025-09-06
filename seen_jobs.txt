@@ -891,3 +891,7 @@ Proof of Concept Software Development Intern-Shure Incorporated
 Game Research & Development Intern, Engine Research-Tencent Americas
 Software Engineering Intern – Eventual (San Francisco, CA)-Eventual
 Software Engineering Intern (Summer 2026, In person)-SEP
+Software Engineering - Applications and Web Intern-Matrix Design Group LLC
+Software Engineering Intern - Summer 2026, Irvine-Cox Automotive Inc.
+Software Engineering – Computer Vision Intern-Matrix Design Group LLC
+Software Engineering - Embedded Systems Intern-Matrix Design Group LLC
