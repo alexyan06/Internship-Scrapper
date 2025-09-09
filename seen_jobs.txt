@@ -1012,3 +1012,5 @@ Software Engineering - Embedded Systems Intern-Alliance Resource Partners, L.P.
 SW Engineering Intern (Summer 2026)-General Dynamics Mission Systems
 Development of Research Software Packages Summer Placement-American Nano Society
 Full Stack Developer Intern-Business Web Solutions (USA)
+Student - Engineering Low Speed ADAS Features-Magna International
+Working Student (m/f/d) Software Development-Checkmk
