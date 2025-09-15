@@ -1270,3 +1270,6 @@ IT Management Development Associate-Nestlé Purina North America
 Software Engineer, Tools Internals (Core)-The Walt Disney Company Nordic & Baltic
 Front-End Development Intern-Brunswick Corporation
 Software Engineering Intern - Summer 2026, Draper, UT-Cox Enterprises
+Cloudflare Sign-In-Cloudflare
+Drainage Engineer Intern - Kiewit Infrastructure Engineers (Summer 2026)-Kiewit
+OCI Undergrad Software Engineer - Full-time Intern Conversion-Oracle
