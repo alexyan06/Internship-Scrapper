@@ -1563,3 +1563,4 @@ Early Talent Trainee - Electrification - ELDS_FES-ABB
 Internship (f/m/d) Software Engineering-ABB
 R&D Test Engineer Internship-ABB
 Firmware Engineering Co-Op - Summer 2026-Midmark Corporation
+Software Engineer Intern - Backend Focused - Summer 2026-Rippling
