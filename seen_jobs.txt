@@ -1809,3 +1809,5 @@ Frontend Web Developer (Unpaid Internship)-CodingEquity
 AI - Internship Program - Remote-The Upskill Academy
 Backend Developer-Wagr
 SWE - Software Engineering Internship - Texas-LunarTech
+Full Stack Engineering Internship (Summer 2026)-Cuckoo Labs
+Software Engineering Intern (Summer 2026)-Encore (YC F24)
