@@ -2324,3 +2324,4 @@ TON Smart Contract Development Internship (ARG + Storytelling)-TapSphere
 Additive Manufacturing Software Development Intern-Matthews Memorialization
 Summer 2026 Internship - Computer Science-Yanfeng
 IT/HPC Emerging Talent Intern Program-Corvid Technologies
+Full Stack Development Internship - Next.js, Typescript-Marketeq Media Inc.
