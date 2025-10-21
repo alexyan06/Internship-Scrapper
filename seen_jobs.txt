@@ -2404,3 +2404,6 @@ Team Kentucky Internship Program - Public Protection - Office of Information Tec
 IT New Business Technology Internship-American Equity
 Intern needed for Summer 2026 - Computer Engineering!-SMS group
 STUDENT - IT SOFTWARE ENGINEERING CO-OP-Daniel Defense, LLC
+Android Developer (Full-time/Intern/Potential Founder)-Aeyesafe
+Research Intern - AI Hardware-Microsoft
+Full Stack Developer Intern (AI + SaaS Platform)-MarkBase Ai
