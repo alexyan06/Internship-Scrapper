@@ -2535,3 +2535,6 @@ Intern - Software Engineer, Multimedia (NTD)-Nintendo
 Intern, Computer Science-Moog Inc.
 Quality Assurance Intern (Caldwell, ID)-J.R. Simplot Company
 IT Intern - Architecture-Ameritas
+Frontend Developer (React / Three.js / Next.js / TypeScript)-UnstableML
+Backend, DevOps, APIs & Cloud Infrastructure Intern-Pal AI
+Senior iOS Engineer, International Growth-LaunchCapital
