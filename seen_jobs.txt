@@ -2546,3 +2546,5 @@ Student Media Coding Assistant-Hoskinson Health & Wellness Clinic
 Software Engineering Intern-Propio
 Embedded Software Engineer (Internship) Granada, Spain-Safran
 Software Development Summer Internship-SimonComputing, Inc.
+Front End Web Development Intern-Linchpin
+Backend Engineering Intern-Tessera Labs
