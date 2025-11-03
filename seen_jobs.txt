@@ -2727,3 +2727,5 @@ Computer Science Intern-Movara
 iOS Application Intern-GenPark
 Design for Test Engineering Intern - Bachelor's Degree-Marvell Technology
 SoC Performance Architect and UVM testbench Intern (Summer 2026)-Cadence
+Android Developer Intern-GenPark
+App Developer – AR/VR (Internship with Partnership Potential)-POZzlePiece LLC
