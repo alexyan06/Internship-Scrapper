@@ -2779,3 +2779,6 @@ Software Engineering Intern (Summer 2025)-Fizz
 Software Development Intern (Summer 2026)-Alpine, an ITW Company
 Software Engineering R&D - Internship-Saviynt
 Computer Science College Intern-CHD Investments
+Software Engineering Intern-Danfoss
+Software Engineering Intern, Security and Compliance-Bear Robotics
+Quality Assurance Intern-Greatland
