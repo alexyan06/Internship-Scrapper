@@ -2901,3 +2901,5 @@ Intern - Software Engineering, AI User Experience-Rakuten International
 Intern - Software Engineering, AI User Experience-Rakuten
 Enterprise Asset Management (EAM), Emerging Talent Intern-Metropolitan Transportation Authority
 Software Developer Intern-SFL Companies
+iOS Swift Developer Intern-LoopLess
+Engineering Intern - Software and Systems Integration-General Dynamics Mission Systems
