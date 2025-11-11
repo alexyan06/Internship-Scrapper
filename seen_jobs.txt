@@ -2913,3 +2913,5 @@ Internship - Python-OpenFOAM Interface for Active Flow Control-Mitsubishi Electr
 Intern, Scaleout Software (Fabric)-Tenstorrent
 Summer Intern - Software Tools Engineer-Cirrus Logic
 Quantitative Developer - Electronic Market Making-Bluesky Capital
+Google Intern-State of Arizona
+Firmware & C++ Development Intern-Zoox
