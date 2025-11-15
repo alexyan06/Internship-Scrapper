@@ -3050,3 +3050,8 @@ AR + AI + Unity Platform Engineer (Intern)-Valkyra Technologies
 Software Engineering Co-Op-Jaros, Baum & Bolles
 Summer 2026 Information Technology Intern - Software Developer-First Citizens Bank
 Front-End Software Engineer Intern-UiPath
+Summer Internship - Mac/Mobile-Federal Reserve Bank of Dallas
+Frontend Software Developer Intern (Summer '26)-Todd
+Intern, Scaleout Software (Distributed Systems & Infrastructure)-Tenstorrent
+Postdoctoral Research Associate - HPC System Architecture and Intelligent Storage Design-Oak Ridge National Laboratory
+Spring Internship - Software Engineering-Radiant System
