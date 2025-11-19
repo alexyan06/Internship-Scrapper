@@ -3127,3 +3127,6 @@ Design Verification Intern-Altera
 (DoD SkillBridge) Northrop Grumman - Military Software Training Program Principal Software Engineering-Northrop Grumman Australia
 Wireless SW Developer Intern-Ericsson
 Undergrad Software Engineer Intern - Fusion-NetSuite
+Summer 2026: Applied Software Engineering Internship (Onsite)-RTX
+Full-Stack Developer (Co-op)-Tetra Tech
+Summer 2026 - Embedded Software Engineering Intern - Philadelphia, PA-Lutron Electronics
