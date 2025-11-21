@@ -3233,3 +3233,6 @@ Software Engineering - SCU - Intern-Nokia
 Software Engineering Intern-Kimley-Horn
 Software Engineer - Intern-Altera
 Frontend & Mobile App Developers Internship-Connex AI
+PEY Software Engineer Intern-Altera
+Research Intern - CXL Memory-Microsoft
+Orbi SW Test Engineer Co-op-NETGEAR
