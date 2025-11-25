@@ -1,42 +1,42 @@
-name: Run Internship Scraper
+# name: Run Internship Scraper
 
-on:
-  schedule:
-    - cron: '0 */4 * * *'
-  workflow_dispatch:
+# on:
+#   schedule:
+#     - cron: '0 */4 * * *'
+#   workflow_dispatch:
 
-permissions:
-  contents: write
+# permissions:
+#   contents: write
 
-jobs:
-  scrape:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+# jobs:
+#   scrape:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check out repository
+#         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.10'
 
-      - name: Install Python dependencies
-        run: |
-          pip install -r requirements.txt
+#       - name: Install Python dependencies
+#         run: |
+#           pip install -r requirements.txt
 
-      - name: Install Playwright browsers
-        run: |
-          playwright install --with-deps chromium
+#       - name: Install Playwright browsers
+#         run: |
+#           playwright install --with-deps chromium
 
-      - name: Run the scraper script
-        id: scraper
-        env:
-          MY_EMAIL_ADDRESS: ${{ secrets.MY_EMAIL_ADDRESS }}
-          MY_EMAIL_APP_PASSWORD: ${{ secrets.MY_EMAIL_APP_PASSWORD }}
-        run: python main.py
+#       - name: Run the scraper script
+#         id: scraper
+#         env:
+#           MY_EMAIL_ADDRESS: ${{ secrets.MY_EMAIL_ADDRESS }}
+#           MY_EMAIL_APP_PASSWORD: ${{ secrets.MY_EMAIL_APP_PASSWORD }}
+#         run: python main.py
 
-      - name: Commit and push updated seen_jobs.txt
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update seen_jobs.txt with new internships"
-          file_pattern: seen_jobs.txt
+#       - name: Commit and push updated seen_jobs.txt
+#         uses: stefanzweifel/git-auto-commit-action@v5
+#         with:
+#           commit_message: "Update seen_jobs.txt with new internships"
+#           file_pattern: seen_jobs.txt
