@@ -90,8 +90,43 @@ def scrape_internship():
 
 def filter_for_matches(internships):
     my_matches = []
-    WANTED_GRAD_TIMES = ["2027-December", "2028", "2028-Spring", "2028-Summer", "N/A", "2027-Winter"]
-    WANTED_HIRE_TIMES = ["2026-Summer", "Summer", "2026-May", "2026-June", "2026-July", "N/A", "2025-Summer", "2025", "2024-Summer", "2024"]
+
+    # NOTE: These values are exact string matches against the Airtable columns.
+    WANTED_GRAD_TIMES = [
+        "2027-December",
+        "2028",
+        "2028-Spring",
+        "2028-Summer",
+        "N/A",
+        "2027-Winter",
+    ]
+
+    # Include Fall 2026 + Spring 2026 (and common variants) in the hire time filter.
+    WANTED_HIRE_TIMES = [
+        # Summer 2026 (existing)
+        "2026-Summer",
+        "Summer",
+        "2026-May",
+        "2026-June",
+        "2026-July",
+
+        # NEW: Fall 2026
+        "2026-Fall",
+        "Fall 2026",
+        "Fall",
+
+        # NEW: Spring 2026
+        "2026-Spring",
+        "Spring 2026",
+        "Spring",
+
+        # existing / fallbacks
+        "N/A",
+        "2025-Summer",
+        "2025",
+        "2024-Summer",
+        "2024",
+    ]
 
     for job in internships:
         grad_time_match = job["grad_time"] in WANTED_GRAD_TIMES
@@ -141,6 +176,8 @@ def send_email(new_jobs):
         html_body += f"<p><b>Title:</b> {job['title']}<br>"
         html_body += f"<b>Company:</b> {job['company']}<br>"
         html_body += f"<b>Location:</b> {job['location']}<br>"
+        html_body += f"<b>Hire Time:</b> {job['hire_time']}<br>"
+        html_body += f"<b>Grad Time:</b> {job['grad_time']}<br>"
         html_body += f"<b>Salary:</b> {job['salary']}<br>"
         # Add the clickable apply link
         html_body += f'<a href="{job["apply_link"]}"><b>Apply Here</b></a></p><hr>'
