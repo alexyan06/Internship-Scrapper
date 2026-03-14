@@ -3837,3 +3837,8 @@ Front end engineer intern-GenPark
 Software Internship-J.F. Taylor, Inc
 Firmware Engineering Intern-ITW
 SRE Intern-Barracuda
+Core SWE Intern-ETCHED
+Infrastructure Intern-ETCHED
+Software Engineer Intern - Applications-Imperative Care
+Software Engineer Intern, Robotics-Imperative Care
+Architecture Intern - Inference-ETCHED
