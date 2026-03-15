@@ -3842,3 +3842,4 @@ Infrastructure Intern-ETCHED
 Software Engineer Intern - Applications-Imperative Care
 Software Engineer Intern, Robotics-Imperative Care
 Architecture Intern - Inference-ETCHED
+Full Stack Engineer-Nordic Analytics Inc
