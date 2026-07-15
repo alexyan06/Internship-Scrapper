@@ -171,10 +171,13 @@ def send_email(new_jobs):
     msg.set_content("Please enable HTML to view this email.")
     msg.add_alternative(html_body, subtype='html')
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login(sender_email, sender_password)
-        smtp.send_message(msg)
-    print(f"Successfully sent email with {len(new_jobs)} new jobs!")
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(sender_email, sender_password)
+            smtp.send_message(msg)
+        print(f"Successfully sent email with {len(new_jobs)} new jobs!")
+    except smtplib.SMTPException as e:
+        print(f"Failed to send email: {e}")
 
 
 # --- MAIN EXECUTION BLOCK ---
