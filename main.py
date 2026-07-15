@@ -81,7 +81,7 @@ def scrape_internship():
                     "qualifications": qualifications.strip() or "N/A",
                 }
                 internships.append(job_data)
-                print(f"Successfully scraped: {job_title}")
+                print(f"Successfully scraped: {job_title} | hire_time={job_data['hire_time']!r}")
 
                 if len(internships) >= MAX_ROWS_TO_SCRAPE:
                     print(f"Reached scrape cap of {MAX_ROWS_TO_SCRAPE} jobs. Stopping.")
@@ -103,24 +103,30 @@ def scrape_internship():
 
 
 def filter_for_matches(internships):
-    """Keep only Summer 2027 internships.
+    """Split jobs into Summer-2027-ish matches and unspecified ones.
 
-    A job matches if its hire_time explicitly says 2027 + Summer, or if
-    hire_time is just the bare year "2027" with no season specified (in
-    which case it might still be Summer, so it's kept as a fallback).
+    matches: hire_time OR title contains "2027", "Summer", "May", or "June".
+    unspecified: hire_time is blank/"N/A" and the title has no keyword hit
+    either - kept as a separate category since it might still turn out to
+    be Summer 2027, just unlabeled.
     """
-    my_matches = []
+    KEYWORDS = ("2027", "Summer", "May", "June")
+
+    def has_keyword(text):
+        return any(keyword in text for keyword in KEYWORDS)
+
+    matches = []
+    unspecified = []
 
     for job in internships:
         hire_time = job["hire_time"]
 
-        if "2027" not in hire_time:
-            continue
+        if has_keyword(hire_time) or has_keyword(job["title"]):
+            matches.append(job)
+        elif hire_time == "N/A":
+            unspecified.append(job)
 
-        if "Summer" in hire_time or hire_time == "2027":
-            my_matches.append(job)
-
-    return my_matches
+    return matches, unspecified
 
 
 def get_new_jobs(jobs, seen_jobs):
@@ -137,8 +143,19 @@ def get_new_jobs(jobs, seen_jobs):
     return new_jobs
 
 
-def send_email(new_jobs):
-    if not new_jobs:
+def _render_job_html(job):
+    html = f"<p><b>Title:</b> {job['title']}<br>"
+    html += f"<b>Company:</b> {job['company']}<br>"
+    html += f"<b>Location:</b> {job['location']}<br>"
+    html += f"<b>Hire Time:</b> {job['hire_time']}<br>"
+    html += f"<b>Grad Time:</b> {job['grad_time']}<br>"
+    html += f"<b>Salary:</b> {job['salary']}<br>"
+    html += f'<a href="{job["apply_link"]}"><b>Apply Here</b></a></p><hr>'
+    return html
+
+
+def send_email(matches, unspecified_jobs):
+    if not matches and not unspecified_jobs:
         print("No new jobs to notify about")
         return
 
@@ -149,18 +166,20 @@ def send_email(new_jobs):
         print("Email credentials not set. Skipping email.")
         return
 
-    subject = f"Found {len(new_jobs)} new internships that match your description!"
+    subject = f"Found {len(matches)} new internships that match your description!"
+    if unspecified_jobs:
+        subject += f" ({len(unspecified_jobs)} more need review)"
 
     html_body = "<html><body>"
     html_body += "<h2>Here are the new internships that match your criteria:</h2>"
-    for job in new_jobs:
-        html_body += f"<p><b>Title:</b> {job['title']}<br>"
-        html_body += f"<b>Company:</b> {job['company']}<br>"
-        html_body += f"<b>Location:</b> {job['location']}<br>"
-        html_body += f"<b>Hire Time:</b> {job['hire_time']}<br>"
-        html_body += f"<b>Grad Time:</b> {job['grad_time']}<br>"
-        html_body += f"<b>Salary:</b> {job['salary']}<br>"
-        html_body += f'<a href="{job["apply_link"]}"><b>Apply Here</b></a></p><hr>'
+    for job in matches:
+        html_body += _render_job_html(job)
+
+    if unspecified_jobs:
+        html_body += "<h2>Needs Review (no hire time / season info found)</h2>"
+        for job in unspecified_jobs:
+            html_body += _render_job_html(job)
+
     html_body += "</body></html>"
 
     msg = EmailMessage()
@@ -171,11 +190,12 @@ def send_email(new_jobs):
     msg.set_content("Please enable HTML to view this email.")
     msg.add_alternative(html_body, subtype='html')
 
+    total = len(matches) + len(unspecified_jobs)
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(sender_email, sender_password)
             smtp.send_message(msg)
-        print(f"Successfully sent email with {len(new_jobs)} new jobs!")
+        print(f"Successfully sent email with {total} new jobs!")
     except smtplib.SMTPException as e:
         print(f"Failed to send email: {e}")
 
@@ -185,6 +205,15 @@ if __name__ == "__main__":
     seen_jobs = load_seen_jobs()
     all_internships = scrape_internship()
     new_jobs = get_new_jobs(all_internships, seen_jobs)
-    my_matches = filter_for_matches(new_jobs)
-    send_email(my_matches)
+    my_matches, unspecified_jobs = filter_for_matches(new_jobs)
+
+    print(f"\nMatches ({len(my_matches)}):")
+    for job in my_matches:
+        print(f"  {job['title']!r} | hire_time={job['hire_time']!r}")
+
+    print(f"\nUnspecified hire_time ({len(unspecified_jobs)}):")
+    for job in unspecified_jobs:
+        print(f"  {job['title']!r} | hire_time={job['hire_time']!r}")
+
+    send_email(my_matches, unspecified_jobs)
     print("\nScript finished.")
