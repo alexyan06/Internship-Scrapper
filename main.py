@@ -103,30 +103,41 @@ def scrape_internship():
 
 
 def filter_for_matches(internships):
-    """Split jobs into Summer-2027-ish matches and unspecified ones.
+    """Denylist-first split into matches / needs-review / dropped.
 
-    matches: hire_time OR title contains "2027", "Summer", "May", or "June".
-    unspecified: hire_time is blank/"N/A" and the title has no keyword hit
-    either - kept as a separate category since it might still turn out to
-    be Summer 2027, just unlabeled.
+    A job is denied (dropped entirely) if its hire_time or title mentions
+    any non-2027, non-Summer signal: "2026", a non-summer season (Fall,
+    Spring, Winter), or a month outside April-July. Denial checks title
+    too, since a job can't be Summer 2027 if its own title says "Fall".
+
+    Anything not denied is a match if it explicitly confirms 2027 +
+    Summer (or an April-July month); otherwise it's ambiguous (blank
+    hire_time, bare "2027" with no season, no signal at all) and goes to
+    needs-review instead of being silently dropped.
     """
-    KEYWORDS = ("2027", "Summer", "May", "June")
-
-    def has_keyword(text):
-        return any(keyword in text for keyword in KEYWORDS)
+    DENY_TERMS = (
+        "2026",
+        "fall", "spring", "winter",
+        "january", "february", "march",
+        "august", "september", "october", "november", "december",
+    )
+    GOOD_TERMS = ("summer", "april", "may", "june", "july")
 
     matches = []
-    unspecified = []
+    needs_review = []
 
     for job in internships:
-        hire_time = job["hire_time"]
+        combined = f"{job['hire_time']} {job['title']}".lower()
 
-        if has_keyword(hire_time) or has_keyword(job["title"]):
+        if any(term in combined for term in DENY_TERMS):
+            continue
+
+        if "2027" in combined and any(term in combined for term in GOOD_TERMS):
             matches.append(job)
-        elif hire_time == "N/A":
-            unspecified.append(job)
+        else:
+            needs_review.append(job)
 
-    return matches, unspecified
+    return matches, needs_review
 
 
 def get_new_jobs(jobs, seen_jobs):
@@ -211,7 +222,7 @@ if __name__ == "__main__":
     for job in my_matches:
         print(f"  {job['title']!r} | hire_time={job['hire_time']!r}")
 
-    print(f"\nUnspecified hire_time ({len(unspecified_jobs)}):")
+    print(f"\nNeeds review ({len(unspecified_jobs)}):")
     for job in unspecified_jobs:
         print(f"  {job['title']!r} | hire_time={job['hire_time']!r}")
 
