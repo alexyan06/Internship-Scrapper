@@ -13,9 +13,9 @@ def load_seen_jobs():
         return set(line.strip() for line in f)
 
 
-def scrape_internship(seen_jobs):
+def scrape_internship():
     AIRTABLE_URL = "https://airtable.com/app17F0kkWQZhC6HB/shrOTtndhc6HSgnYb/tblp8wxvfYam5sD04?"
-    CONSECUTIVE_SEEN_LIMIT = 10
+    MAX_ROWS_TO_SCRAPE = 200
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -30,7 +30,6 @@ def scrape_internship(seen_jobs):
 
         internships = []
         processed_row_ids = set()
-        consecutive_seen_count = 0
         early_exit = False
 
         while True:
@@ -84,16 +83,10 @@ def scrape_internship(seen_jobs):
                 internships.append(job_data)
                 print(f"Successfully scraped: {job_title}")
 
-                # --- EARLY EXIT CHECK ---
-                job_id = f"{job_data['title']}-{job_data['company']}"
-                if job_id in seen_jobs:
-                    consecutive_seen_count += 1
-                    if consecutive_seen_count >= CONSECUTIVE_SEEN_LIMIT:
-                        print(f"Last {CONSECUTIVE_SEEN_LIMIT} scraped jobs were already seen. Stopping early.")
-                        early_exit = True
-                        break
-                else:
-                    consecutive_seen_count = 0
+                if len(internships) >= MAX_ROWS_TO_SCRAPE:
+                    print(f"Reached scrape cap of {MAX_ROWS_TO_SCRAPE} jobs. Stopping.")
+                    early_exit = True
+                    break
 
             if early_exit:
                 break
@@ -110,42 +103,23 @@ def scrape_internship(seen_jobs):
 
 
 def filter_for_matches(internships):
+    """Keep only Summer 2027 internships.
+
+    A job matches if its hire_time explicitly says 2027 + Summer, or if
+    hire_time is just the bare year "2027" with no season specified (in
+    which case it might still be Summer, so it's kept as a fallback).
+    """
     my_matches = []
 
-    WANTED_GRAD_TIMES = [
-        "2027-December",
-        "2028",
-        "2028-Spring",
-        "2028-Summer",
-        "N/A",
-        "2027-Winter",
-    ]
-
-    WANTED_HIRE_TIMES = [
-        "2026-Summer",
-        "Summer",
-        "2026-May",
-        "2026-June",
-        "2026-July",
-        "2026-Fall",
-        "Fall 2026",
-        "Fall",
-        "2026-Spring",
-        "Spring 2026",
-        "Spring",
-        "N/A",
-        "2025-Summer",
-        "2025",
-        "2024-Summer",
-        "2024",
-    ]
-
     for job in internships:
-        grad_time_match = job["grad_time"] in WANTED_GRAD_TIMES
-        hire_time_match = job["hire_time"] in WANTED_HIRE_TIMES
+        hire_time = job["hire_time"]
 
-        if grad_time_match and hire_time_match:
+        if "2027" not in hire_time:
+            continue
+
+        if "Summer" in hire_time or hire_time == "2027":
             my_matches.append(job)
+
     return my_matches
 
 
@@ -206,8 +180,8 @@ def send_email(new_jobs):
 # --- MAIN EXECUTION BLOCK ---
 if __name__ == "__main__":
     seen_jobs = load_seen_jobs()
-    all_internships = scrape_internship(seen_jobs)
-    my_matches = filter_for_matches(all_internships)
-    new_matching_jobs = get_new_jobs(my_matches, seen_jobs)
-    send_email(new_matching_jobs)
+    all_internships = scrape_internship()
+    new_jobs = get_new_jobs(all_internships, seen_jobs)
+    my_matches = filter_for_matches(new_jobs)
+    send_email(my_matches)
     print("\nScript finished.")
