@@ -110,10 +110,11 @@ def filter_for_matches(internships):
     Spring, Winter), or a month outside April-July. Denial checks title
     too, since a job can't be Summer 2027 if its own title says "Fall".
 
-    Anything not denied is a match if it explicitly confirms 2027 +
-    Summer (or an April-July month); otherwise it's ambiguous (blank
-    hire_time, bare "2027" with no season, no signal at all) and goes to
-    needs-review instead of being silently dropped.
+    Anything not denied is a match if it mentions "2027", or mentions
+    Summer / an April-July month (either signal alone is enough, since
+    the denylist already ruled out wrong years and wrong seasons/months);
+    otherwise it's ambiguous (blank hire_time, no signal at all) and goes
+    to needs-review instead of being silently dropped.
     """
     DENY_TERMS = (
         "2026",
@@ -121,7 +122,7 @@ def filter_for_matches(internships):
         "january", "february", "march",
         "august", "september", "october", "november", "december",
     )
-    GOOD_TERMS = ("summer", "april", "may", "june", "july")
+    GOOD_TERMS = ("2027", "summer", "april", "may", "june", "july")
 
     matches = []
     needs_review = []
@@ -132,7 +133,7 @@ def filter_for_matches(internships):
         if any(term in combined for term in DENY_TERMS):
             continue
 
-        if "2027" in combined and any(term in combined for term in GOOD_TERMS):
+        if any(term in combined for term in GOOD_TERMS):
             matches.append(job)
         else:
             needs_review.append(job)
