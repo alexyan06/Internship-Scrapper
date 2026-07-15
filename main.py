@@ -60,13 +60,13 @@ def scrape_internship():
                 date = right_row.locator('div[data-columnindex="1"]').inner_text()
                 location = right_row.locator('div[data-columnindex="4"]').inner_text()
                 company = right_row.locator('div[data-columnindex="5"]').inner_text()
-                hire_time = right_row.locator('div[data-columnindex="6"]').inner_text()
-                grad_time = right_row.locator('div[data-columnindex="7"]').inner_text()
+                salary = right_row.locator('div[data-columnindex="6"]').inner_text()
+                hire_time = right_row.locator('div[data-columnindex="7"]').inner_text()
+                grad_time = right_row.locator('div[data-columnindex="8"]').inner_text()
 
                 scroll_container.evaluate("node => node.scrollLeft = node.scrollWidth")
                 page.wait_for_timeout(250)
 
-                salary = right_row.locator('div[data-columnindex="10"]').inner_text()
                 qualifications = right_row.locator('div[data-columnindex="11"]').inner_text()
 
                 job_data = {
