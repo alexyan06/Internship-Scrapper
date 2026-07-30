@@ -524,3 +524,5 @@ Software Developer Intern-Leidos
 Software Engineer (Paid Internship)-Conifer Life Sciences Group, LLC
 Software Engineering Intern (Summer 2027)-RTX
 Design Engineer Intern-Simular
+Cloud Engineer Intern-Nevis Security
+Engineering Intern (Fall)-Forus
