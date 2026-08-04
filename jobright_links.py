@@ -261,6 +261,35 @@ def _unescape(url):
     return url.replace("\\u002F", "/").replace("\\/", "/")
 
 
+def _url_from_keys(html):
+    """The destination as stated by the authenticated payload, if present."""
+    for key in _AUTHORITATIVE_KEYS:
+        for raw in re.findall(_KEY_VALUE_RE.format(key=key), html):
+            url = _unescape(raw)
+            if _is_reachable(url):
+                return url
+    return None
+
+
+def _await_apply_url(page, timeout_ms=_RENDER_MS, interval_ms=250):
+    """Poll until the payload carries the destination, or give up.
+
+    Measured, the key lands 1.3-2.2s after `domcontentloaded`. Sleeping a flat
+    worst-case instead cost ~10s per job, which is ~12 wasted minutes over a
+    typical 70-job run. Returning the moment it appears keeps the slow path
+    available for pages that genuinely need it.
+    """
+    waited = 0
+    while True:
+        url = _url_from_keys(page.content())
+        if url:
+            return url
+        if waited >= timeout_ms:
+            return None
+        page.wait_for_timeout(interval_ms)
+        waited += interval_ms
+
+
 def _extract_from_markup(page, company_host):
     """Cheapest path: the URL is embedded in the authenticated page payload.
 
@@ -270,11 +299,9 @@ def _extract_from_markup(page, company_host):
     """
     html = page.content()
 
-    for key in _AUTHORITATIVE_KEYS:
-        for raw in re.findall(_KEY_VALUE_RE.format(key=key), html):
-            url = _unescape(raw)
-            if _is_reachable(url):
-                return url
+    url = _url_from_keys(html)
+    if url:
+        return url
 
     # The visible "Original Job Post" link is the same destination, and exists
     # even if the key names change.
@@ -369,26 +396,36 @@ def resolve_apply_links(jobs):
             browser.close()
             return jobs
 
-        for job in targets:
+        total = len(targets)
+        print(f"Resolving {total} links (~{total * 3 // 60 + 1} min)...", flush=True)
+
+        for i, job in enumerate(targets, 1):
+            label = f"[{i}/{total}] {job['title'][:38]!r}"
             try:
                 page.goto(job["apply_link"], wait_until="domcontentloaded", timeout=45000)
-                page.wait_for_timeout(_RENDER_MS)
-                _dismiss_overlays(page)
 
-                company_host = _company_homepage_host(page.content())
-                url = (_extract_from_markup(page, company_host)
-                       or _extract_by_clicking(page, context, company_host))
+                # Fast path: the payload states the destination outright, and
+                # nothing here needs the page rendered or the overlays gone.
+                url = _await_apply_url(page)
+
+                # Slow path only when that fails -- clearing modals and clicking
+                # through costs seconds, so it is not worth paying every time.
+                if not url:
+                    _dismiss_overlays(page)
+                    company_host = _company_homepage_host(page.content())
+                    url = (_extract_from_markup(page, company_host)
+                           or _extract_by_clicking(page, context, company_host))
 
                 if url:
                     job["original_link"] = url
                     resolved += 1
-                    print(f"  resolved: {job['title'][:40]!r} -> {url[:80]}")
+                    print(f"  {label} -> {url[:70]}", flush=True)
                 else:
-                    print(f"  unresolved, keeping jobright link: {job['title'][:40]!r}")
+                    print(f"  {label} unresolved, keeping jobright link", flush=True)
             except Exception as e:
-                print(f"  lookup failed for {job['title'][:40]!r}: {type(e).__name__}")
+                print(f"  {label} failed: {type(e).__name__}", flush=True)
 
         browser.close()
 
-    print(f"Resolved {resolved}/{len(targets)} original posting links.")
+    print(f"Resolved {resolved}/{len(targets)} original posting links.", flush=True)
     return jobs
