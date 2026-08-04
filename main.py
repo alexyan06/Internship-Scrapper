@@ -1,7 +1,11 @@
 import os
+import re
 import smtplib
 from email.message import EmailMessage
 from playwright.sync_api import sync_playwright, TimeoutError
+
+import sheets_export
+from jobright_links import resolve_apply_links
 
 
 def load_seen_jobs():
@@ -102,6 +106,33 @@ def scrape_internship():
         return internships
 
 
+# Word boundaries are required, not stylistic: "ms" appears inside Systems,
+# Platforms and Algorithms, and "graduate" inside "Undergraduate". Substring
+# matching -- the style DENY_TERMS below uses -- would be badly wrong here.
+BACHELORS_RE = re.compile(
+    r"\b(?:b\.?s\.?|b\.?a\.?|bachelor'?s?|undergrad(?:uate)?)\b",
+    re.IGNORECASE,
+)
+HIGHER_DEGREE_RE = re.compile(
+    r"\b(?:ph\.?\s?d\.?|m\.?s\.?|m\.?eng\.?|m\.?b\.?a\.?|master'?s?|"
+    r"doctora(?:l|te)|post[-\s]?doc(?:toral)?|grad(?:uate)?\s+students?)\b",
+    re.IGNORECASE,
+)
+
+
+def is_bachelors_eligible(job):
+    """True unless the title names a higher degree with no bachelors signal.
+
+    A bachelors marker anywhere in the title wins outright -- "(BS/MS)" is
+    open to undergrads. Silence about degree also means keep; only an
+    unaccompanied MS/PhD/Master's signal drops the job.
+    """
+    title = job.get("title", "")
+    if BACHELORS_RE.search(title):
+        return True
+    return not HIGHER_DEGREE_RE.search(title)
+
+
 def filter_for_matches(internships):
     """Denylist-first split into matches / needs-review / dropped.
 
@@ -115,6 +146,11 @@ def filter_for_matches(internships):
     the denylist already ruled out wrong years and wrong seasons/months);
     otherwise it's ambiguous (blank hire_time, no signal at all) and goes
     to needs-review instead of being silently dropped.
+
+    Survivors then pass a degree gate (see is_bachelors_eligible). Rejects
+    are returned as a third list rather than dropped silently, so the run
+    log can show what the degree filter cost us -- seen_jobs.txt is written
+    before filtering, so a bad drop is permanent.
     """
     DENY_TERMS = (
         "2026",
@@ -126,6 +162,7 @@ def filter_for_matches(internships):
 
     matches = []
     needs_review = []
+    degree_dropped = []
 
     for job in internships:
         combined = f"{job['hire_time']} {job['title']}".lower()
@@ -133,12 +170,17 @@ def filter_for_matches(internships):
         if any(term in combined for term in DENY_TERMS):
             continue
 
+        # Degree gate applies to both buckets, so it sits before the split.
+        if not is_bachelors_eligible(job):
+            degree_dropped.append(job)
+            continue
+
         if any(term in combined for term in GOOD_TERMS):
             matches.append(job)
         else:
             needs_review.append(job)
 
-    return matches, needs_review
+    return matches, needs_review, degree_dropped
 
 
 def get_new_jobs(jobs, seen_jobs):
@@ -156,14 +198,22 @@ def get_new_jobs(jobs, seen_jobs):
 
 
 def _render_job_html(job):
+    jobright_link = job.get("apply_link", "N/A")
+    apply_link = job.get("original_link") or jobright_link
+
     html = f"<p><b>Title:</b> {job['title']}<br>"
     html += f"<b>Company:</b> {job['company']}<br>"
     html += f"<b>Location:</b> {job['location']}<br>"
     html += f"<b>Hire Time:</b> {job['hire_time']}<br>"
     html += f"<b>Grad Time:</b> {job['grad_time']}<br>"
     html += f"<b>Salary:</b> {job['salary']}<br>"
-    html += f'<a href="{job["apply_link"]}"><b>Apply Here</b></a></p><hr>'
-    return html
+    html += f'<a href="{apply_link}"><b>Apply Here</b></a>'
+
+    # Only worth showing both when we actually got past jobright.
+    if apply_link != jobright_link and jobright_link.startswith("http"):
+        html += f' &nbsp;|&nbsp; <a href="{jobright_link}">(Jobright listing)</a>'
+
+    return html + "</p><hr>"
 
 
 def send_email(matches, unspecified_jobs):
@@ -217,7 +267,7 @@ if __name__ == "__main__":
     seen_jobs = load_seen_jobs()
     all_internships = scrape_internship()
     new_jobs = get_new_jobs(all_internships, seen_jobs)
-    my_matches, unspecified_jobs = filter_for_matches(new_jobs)
+    my_matches, unspecified_jobs, degree_dropped = filter_for_matches(new_jobs)
 
     print(f"\nMatches ({len(my_matches)}):")
     for job in my_matches:
@@ -227,5 +277,15 @@ if __name__ == "__main__":
     for job in unspecified_jobs:
         print(f"  {job['title']!r} | hire_time={job['hire_time']!r}")
 
+    print(f"\nDegree-filtered out ({len(degree_dropped)}):")
+    for job in degree_dropped:
+        print(f"  {job['title']!r}")
+
+    # Only the jobs we're about to report on -- each lookup is a page load.
+    if my_matches or unspecified_jobs:
+        print("\nResolving original posting links...")
+        resolve_apply_links(my_matches + unspecified_jobs)
+
+    sheets_export.append_matches(my_matches)
     send_email(my_matches, unspecified_jobs)
     print("\nScript finished.")

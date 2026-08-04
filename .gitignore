@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 venv/
 .venv/
+
+# Local credentials for testing -- never commit these.
+.env
+service_account.json
