@@ -43,6 +43,14 @@ jobs:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: python main.py
 
+      # A scrape takes minutes, so main can move while it runs -- a code push,
+      # or an overlapping run. Without this the auto-commit below is rejected
+      # as non-fast-forward and the new seen_jobs.txt entries are lost, which
+      # means the next run re-reports every one of those jobs.
+      # autostash keeps the pending seen_jobs.txt change across the rebase.
+      - name: Rebase onto any commits pushed during the run
+        run: git -c rebase.autoStash=true pull --rebase origin ${{ github.ref_name }}
+
       - name: Commit and push updated seen_jobs.txt
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
