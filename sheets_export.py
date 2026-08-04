@@ -47,9 +47,37 @@ def _open_worksheet():
     return worksheet
 
 
-def append_matches(matches):
-    """Append confirmed Summer 2027 matches. Never raises -- the email still matters."""
-    if not matches:
+MAYBE = "maybe"
+
+
+def _row(job, today, hire_time=None):
+    return [
+        today,
+        job.get("date", "N/A"),
+        job.get("title", "N/A"),
+        job.get("company", "N/A"),
+        job.get("location", "N/A"),
+        hire_time or job.get("hire_time", "N/A"),
+        job.get("grad_time", "N/A"),
+        job.get("salary", "N/A"),
+        job.get("original_link", job.get("apply_link", "N/A")),
+        job.get("apply_link", "N/A"),
+    ]
+
+
+def append_matches(matches, maybes=()):
+    """Append confirmed Summer 2027 matches, plus inconclusive ones marked "maybe".
+
+    `maybes` are jobs that named no season and no year at all. Anything
+    carrying an explicit contrary signal -- a non-2027 year, or an off-season
+    with no summer option -- was already dropped upstream and never reaches
+    here, so a "maybe" row is genuinely unknown rather than known-wrong. Their
+    Hire Time reads "maybe" so the sheet never implies a confirmed date.
+
+    Never raises -- the email still matters.
+    """
+    maybes = list(maybes)
+    if not matches and not maybes:
         print("No confirmed matches to add to the sheet.")
         return
 
@@ -58,18 +86,8 @@ def append_matches(matches):
         return
 
     today = datetime.now().strftime("%Y-%m-%d")
-    rows = [[
-        today,
-        job.get("date", "N/A"),
-        job.get("title", "N/A"),
-        job.get("company", "N/A"),
-        job.get("location", "N/A"),
-        job.get("hire_time", "N/A"),
-        job.get("grad_time", "N/A"),
-        job.get("salary", "N/A"),
-        job.get("original_link", job.get("apply_link", "N/A")),
-        job.get("apply_link", "N/A"),
-    ] for job in matches]
+    rows = ([_row(job, today) for job in matches]
+            + [_row(job, today, hire_time=MAYBE) for job in maybes])
 
     # Write at an explicit range rather than appending.
     #
@@ -99,6 +117,9 @@ def append_matches(matches):
 
         worksheet.update(values=payload, range_name=f"A{start_row}",
                          value_input_option="USER_ENTERED")
-        print(f"Added {len(rows)} confirmed matches to the Google Sheet.")
+        summary = f"Added {len(rows)} rows to the Google Sheet"
+        if maybes:
+            summary += f" ({len(matches)} confirmed, {len(maybes)} marked '{MAYBE}')"
+        print(summary + ".")
     except Exception as e:
         print(f"Failed to write rows to sheet: {type(e).__name__}: {e}")
