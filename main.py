@@ -133,41 +133,76 @@ def is_bachelors_eligible(job):
     return not HIGHER_DEGREE_RE.search(title)
 
 
-def filter_for_matches(internships):
-    """Denylist-first split into matches / needs-review / dropped.
+# Word-bounded like the degree patterns above, and for the same reason: "may"
+# sits inside Maynard, "march" inside Marchetti, "fall" inside Fallback.
+_YEAR_RE = re.compile(r"\b(20\d{2})\b")
+_SUMMER_RE = re.compile(r"\b(?:summer|april|may|june|july)\b", re.IGNORECASE)
+_OFF_SEASON_RE = re.compile(
+    r"\b(?:fall|autumn|spring|winter|january|february|march|"
+    r"august|september|october|november|december)\b",
+    re.IGNORECASE,
+)
 
-    A job is denied (dropped entirely) if its hire_time or title mentions
-    any non-2027, non-Summer signal: "2026", a non-summer season (Fall,
-    Spring, Winter), or a month outside April-July. Denial checks title
-    too, since a job can't be Summer 2027 if its own title says "Fall".
 
-    Anything not denied is a match if it mentions "2027", or mentions
-    Summer / an April-July month (either signal alone is enough, since
-    the denylist already ruled out wrong years and wrong seasons/months);
-    otherwise it's ambiguous (blank hire_time, no signal at all) and goes
-    to needs-review instead of being silently dropped.
+def classify_timing(job):
+    """'match' | 'review' | 'drop' for a job's Summer-2027 fit.
 
-    Survivors then pass a degree gate (see is_bachelors_eligible). Rejects
-    are returned as a third list rather than dropped silently, so the run
-    log can show what the degree filter cost us -- seen_jobs.txt is written
-    before filtering, so a bad drop is permanent.
+    Reads hire_time and title together, since either may carry the timing.
+
+    The ordering matters. A summer signal *outranks* a co-listed off-season
+    one, because "Spring/Summer 2027" is a role you can take in summer --
+    the previous denylist-first rule dropped those outright. An off-season
+    signal only decides the outcome when no summer option accompanies it,
+    which still drops "Fall 2026 or Spring 2027" correctly.
+
+    A bare "Summer" with no year counts as a match. An explicitly wrong year
+    is already dropped before that point, so the only thing reaching it is an
+    unqualified summer posting, which at this stage means 2027.
     """
-    DENY_TERMS = (
-        "2026",
-        "fall", "spring", "winter",
-        "january", "february", "march",
-        "august", "september", "october", "november", "december",
-    )
-    GOOD_TERMS = ("2027", "summer", "april", "may", "june", "july")
+    text = f"{job.get('hire_time', '')} {job.get('title', '')}"
 
+    years = set(_YEAR_RE.findall(text))
+    wants_2027 = "2027" in years
+    other_year_only = bool(years - {"2027"}) and not wants_2027
+
+    summer = bool(_SUMMER_RE.search(text))
+    off_season = bool(_OFF_SEASON_RE.search(text))
+
+    if summer and wants_2027:
+        return "match"
+    if other_year_only:
+        return "drop"
+    if off_season and not summer:
+        return "drop"
+    if wants_2027:
+        # 2027 with no conflicting season. Internships default to summer.
+        return "match"
+    if summer:
+        # Summer with no year stated. 2026 summer hiring is over by the time
+        # this runs, and an explicit wrong year would have been caught above,
+        # so an unqualified "Summer" is taken as 2027.
+        return "match"
+    return "review"
+
+
+def filter_for_matches(internships):
+    """Split into matches / needs-review / degree-dropped.
+
+    Timing decides the split (see classify_timing); "drop" jobs are discarded
+    entirely, "review" ones are surfaced in the email rather than silently
+    binned. Survivors then pass a degree gate (see is_bachelors_eligible).
+
+    Degree rejects are returned as a third list rather than dropped silently,
+    so the run log can show what that filter cost us -- seen_jobs.txt is
+    written before filtering, so a bad drop is permanent.
+    """
     matches = []
     needs_review = []
     degree_dropped = []
 
     for job in internships:
-        combined = f"{job['hire_time']} {job['title']}".lower()
-
-        if any(term in combined for term in DENY_TERMS):
+        verdict = classify_timing(job)
+        if verdict == "drop":
             continue
 
         # Degree gate applies to both buckets, so it sits before the split.
@@ -175,10 +210,7 @@ def filter_for_matches(internships):
             degree_dropped.append(job)
             continue
 
-        if any(term in combined for term in GOOD_TERMS):
-            matches.append(job)
-        else:
-            needs_review.append(job)
+        (matches if verdict == "match" else needs_review).append(job)
 
     return matches, needs_review, degree_dropped
 
