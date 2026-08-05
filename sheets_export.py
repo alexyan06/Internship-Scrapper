@@ -47,8 +47,6 @@ def _open_worksheet():
     return worksheet
 
 
-MAYBE = "maybe"
-
 TITLE_COL = HEADER.index("Title")
 COMPANY_COL = HEADER.index("Company")
 
@@ -82,14 +80,14 @@ def _drop_already_present(jobs, existing):
     return kept, skipped
 
 
-def _row(job, today, hire_time=None):
+def _row(job, today):
     return [
         today,
         job.get("date", "N/A"),
         job.get("title", "N/A"),
         job.get("company", "N/A"),
         job.get("location", "N/A"),
-        hire_time or job.get("hire_time", "N/A"),
+        job.get("hire_time", "N/A"),
         job.get("grad_time", "N/A"),
         job.get("salary", "N/A"),
         job.get("original_link", job.get("apply_link", "N/A")),
@@ -98,13 +96,13 @@ def _row(job, today, hire_time=None):
 
 
 def append_matches(matches, maybes=()):
-    """Append confirmed Summer 2027 matches, plus inconclusive ones marked "maybe".
+    """Append confirmed Summer 2027 matches, plus inconclusive ones.
 
     `maybes` are jobs that named no season and no year at all. Anything
     carrying an explicit contrary signal -- a non-2027 year, or an off-season
     with no summer option -- was already dropped upstream and never reaches
-    here, so a "maybe" row is genuinely unknown rather than known-wrong. Their
-    Hire Time reads "maybe" so the sheet never implies a confirmed date.
+    here, so a maybe row is genuinely unknown rather than known-wrong. They are
+    written exactly like matches, showing whatever hire time the board gave.
 
     Never raises -- the email still matters.
     """
@@ -138,8 +136,7 @@ def append_matches(matches, maybes=()):
             print(f"Skipped {skipped} job(s) already in the sheet.")
 
         today = datetime.now().strftime("%Y-%m-%d")
-        rows = ([_row(job, today) for job in matches]
-                + [_row(job, today, hire_time=MAYBE) for job in maybes])
+        rows = [_row(job, today) for job in matches + maybes]
         if not rows:
             print("Nothing new to add to the sheet.")
             return
@@ -162,7 +159,7 @@ def append_matches(matches, maybes=()):
                          value_input_option="USER_ENTERED")
         summary = f"Added {len(rows)} rows to the Google Sheet"
         if maybes:
-            summary += f" ({len(matches)} confirmed, {len(maybes)} marked '{MAYBE}')"
+            summary += f" ({len(matches)} confirmed, {len(maybes)} inconclusive)"
         print(summary + ".")
     except Exception as e:
         print(f"Failed to write rows to sheet: {type(e).__name__}: {e}")

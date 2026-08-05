@@ -334,7 +334,7 @@ if __name__ == "__main__":
         print("\nResolving original posting links...")
         resolve_apply_links(my_matches + unspecified_jobs)
 
-    # Inconclusive jobs go to the sheet too, flagged "maybe". Anything with a
+    # Inconclusive jobs go to the sheet too, as ordinary rows. Anything with a
     # contrary season/year signal was dropped by classify_timing and is not in
     # either list, so nothing known-wrong can reach the sheet this way.
     sheets_export.append_matches(my_matches, unspecified_jobs)
