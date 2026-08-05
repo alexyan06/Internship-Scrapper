@@ -26,11 +26,19 @@ import re
 
 from playwright.sync_api import sync_playwright, TimeoutError
 
-# Any job page works as a place to open the auth modal from.
-_LOGIN_ANCHOR = "https://jobright.ai/jobs/info/6a71c74445b6af1c30dbab9d"
+# The homepage, deliberately, not a job page. This used to point at a specific
+# posting; that job eventually closed, and a closed page swaps APPLY NOW for
+# "APPLY TO SIMILAR JOBS", so the modal never opened and every run lost its
+# links. The homepage cannot expire, and JOIN NOW is present on it.
+_LOGIN_ANCHOR = "https://jobright.ai"
 
 _USER_AGENT = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
                "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+
+# The modal's own submit: "SIGN IN" on the homepage, "SIGN IN TO APPLY" on a
+# job page. Anchored so it cannot match "Sign in with Google", which sits
+# directly above it and is the first hit for any loose "sign in" pattern.
+_SUBMIT_RE = re.compile(r"^\s*sign\s*in(\s+to\s+apply)?\s*$", re.IGNORECASE)
 
 # Job pages render slowly; every wait needs real headroom.
 _RENDER_MS = 12000
@@ -211,9 +219,11 @@ def _sign_in(page, email, password):
     """Drive jobright's auth modal. Returns True only on a verified session."""
     page.goto(_LOGIN_ANCHOR, wait_until="domcontentloaded", timeout=60000)
 
-    apply_btn = page.get_by_role("button", name="APPLY NOW", exact=False).first
-    apply_btn.wait_for(state="visible", timeout=_WAIT_MS)
-    apply_btn.click()
+    # JOIN NOW rather than APPLY NOW: it is on every page including the
+    # homepage, whereas APPLY NOW only exists on a job that is still open.
+    join_btn = page.get_by_role("button", name="JOIN NOW", exact=False).first
+    join_btn.wait_for(state="visible", timeout=_WAIT_MS)
+    join_btn.click()
 
     # The modal opens in sign-up mode; flip it to sign-in.
     switch = page.get_by_role("button", name="Already a member", exact=False).first
@@ -226,8 +236,13 @@ def _sign_in(page, email, password):
     page.fill("#basic_email", email)
     page.fill("#basic_password", password)
 
-    # Must be the modal's submit, NOT the header "SIGN IN" button.
-    page.get_by_role("button", name="SIGN IN TO APPLY", exact=False).first.click()
+    # Scoped to the modal, because an unscoped match hits the header "SIGN IN",
+    # which silently never submits. Anchored, because a substring match hits
+    # "Sign in with Google" -- the OAuth button, which we cannot drive.
+    modal = page.locator(".ant-modal")
+    scope = modal.last if modal.count() else page
+    submit = scope.get_by_role("button", name=_SUBMIT_RE)
+    submit.first.click()
 
     # A real session removes the logged-out header controls AND the password
     # field. Poll on counts rather than waiting for one node to detach -- React
