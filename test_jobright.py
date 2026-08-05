@@ -27,6 +27,9 @@ load_dotenv()
 
 from jobright_links import resolve_apply_links  # noqa: E402 -- needs env first
 
+# This posting has since closed, which is fine as a smoke test -- closed pages
+# still carry originalUrl, so it exercises sign-in and extraction either way.
+# Pass a current URL as an argument to test against a live posting.
 DEFAULT_JOB = "https://jobright.ai/jobs/info/6a71c74445b6af1c30dbab9d"
 
 
