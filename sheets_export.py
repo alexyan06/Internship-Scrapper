@@ -49,6 +49,38 @@ def _open_worksheet():
 
 MAYBE = "maybe"
 
+TITLE_COL = HEADER.index("Title")
+COMPANY_COL = HEADER.index("Company")
+
+
+def _sheet_identity(row):
+    """(title, company) for an existing sheet row, matching main.job_id."""
+    if len(row) <= COMPANY_COL:
+        return None
+    title, company = row[TITLE_COL].strip(), row[COMPANY_COL].strip()
+    return (title, company) if title else None
+
+
+def _drop_already_present(jobs, existing):
+    """Filter out jobs whose title+company is already a row in the sheet.
+
+    A backstop rather than the primary defence -- get_new_jobs should have
+    excluded these already. It exists because that check depends on
+    seen_jobs.txt surviving the run, and when a commit of it failed the next
+    run happily re-added every job. The sheet itself is the one record that
+    cannot get out of sync with the sheet.
+    """
+    seen = {ident for ident in (_sheet_identity(r) for r in existing) if ident}
+    kept, skipped = [], 0
+    for job in jobs:
+        ident = (str(job.get("title", "")).strip(), str(job.get("company", "")).strip())
+        if ident in seen:
+            skipped += 1
+            continue
+        seen.add(ident)  # also collapses duplicates within this batch
+        kept.append(job)
+    return kept, skipped
+
 
 def _row(job, today, hire_time=None):
     return [
@@ -85,10 +117,6 @@ def append_matches(matches, maybes=()):
     if worksheet is None:
         return
 
-    today = datetime.now().strftime("%Y-%m-%d")
-    rows = ([_row(job, today) for job in matches]
-            + [_row(job, today, hire_time=MAYBE) for job in maybes])
-
     # Write at an explicit range rather than appending.
     #
     # append() resolves its insert position server-side from the last populated
@@ -101,6 +129,21 @@ def append_matches(matches, maybes=()):
     # from the last row with actual content instead.
     try:
         existing = worksheet.get_all_values()
+
+        matches, skipped_m = _drop_already_present(matches, existing)
+        maybes, skipped_b = _drop_already_present(maybes, existing + [
+            _row(j, "") for j in matches])
+        skipped = skipped_m + skipped_b
+        if skipped:
+            print(f"Skipped {skipped} job(s) already in the sheet.")
+
+        today = datetime.now().strftime("%Y-%m-%d")
+        rows = ([_row(job, today) for job in matches]
+                + [_row(job, today, hire_time=MAYBE) for job in maybes])
+        if not rows:
+            print("Nothing new to add to the sheet.")
+            return
+
         last_filled = max((i + 1 for i, row in enumerate(existing)
                            if any(cell.strip() for cell in row)), default=0)
 

@@ -215,17 +215,33 @@ def filter_for_matches(internships):
     return matches, needs_review, degree_dropped
 
 
+def job_id(job):
+    """Identity used for dedupe, in seen_jobs.txt and against the sheet."""
+    return f"{job.get('title')}-{job.get('company')}"
+
+
 def get_new_jobs(jobs, seen_jobs):
+    """Jobs not seen before, deduped within this batch as well as against it.
+
+    The batch check is not redundant: the Airtable lists the same title and
+    company more than once (separate reqs, different locations), and without
+    it both copies pass, get written to seen_jobs.txt twice, and land in the
+    sheet twice.
+    """
     SEEN_JOBS_FILE = "seen_jobs.txt"
     new_jobs = []
+    batch_ids = set()
+
     for job in jobs:
-        job_id = f"{job.get('title')}-{job.get('company')}"
-        if job_id not in seen_jobs:
-            new_jobs.append(job)
+        jid = job_id(job)
+        if jid in seen_jobs or jid in batch_ids:
+            continue
+        batch_ids.add(jid)
+        new_jobs.append(job)
+
     with open(SEEN_JOBS_FILE, 'a') as f:
         for job in new_jobs:
-            job_id = f"{job.get('title')}-{job.get('company')}"
-            f.write(job_id + "\n")
+            f.write(job_id(job) + "\n")
     return new_jobs
 
 
