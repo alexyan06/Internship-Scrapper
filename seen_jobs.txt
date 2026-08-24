@@ -1164,3 +1164,4 @@ Information Technology Summer 2027 Internship (Euclid, Oh) Job Details | Lincoln
 Formal Verification Intern-Tenstorrent
 Quality Software Engineer Intern Job Details | Leonardo DRS, Inc.-Leonardo DRS
 Embedded Software Engineer Intern Job Details | Leonardo DRS, Inc.-Leonardo DRS
+Design Verification Software Intern-Tenstorrent
