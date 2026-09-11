@@ -2310,3 +2310,6 @@ Activision US 2027 Summer Internships - Production-Infinity Ward
 Application Engineer - Intern-Waystar
 NVIDIA 2027 Internships: Ph.D. Research Graphics and Simulation-NVIDIA
 Technology Undergraduate Summer Internship-Wellington Management
+Software Developer Intern-Trihydro Corporation
+Software Development Engineer Intern/Co-Op, ROBOTICS - 2027-Amazon
+Technology Intern-USAA
