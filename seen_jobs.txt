@@ -4747,3 +4747,7 @@ Intern: Summer 2027 - Control/Diagnostic Software (Onsite)-RTX
 Systems/Software Testing Engineer Cloud & On-Premise Intern-Hewlett Packard Enterprise
 Technology Intern-Eli Lilly and Company
 Software Engineering Intern (Year-Round)-BorgWarner
+3D Unity Game Developer/Instructor-Coding Mind Academy
+ASIC EDA Infrastructure Engineer Intern-Meta
+Enterprise Application Intern (Summer 2027)-Zurn Elkay Water Solutions
+2027 Spring Co-op Software Engineer Intern – McClellan CA-Northrop Grumman
