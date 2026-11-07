@@ -4879,3 +4879,5 @@ iOS Engineer Intern-Match Group
 Internship - Computational geometry and computer graphics developer-BimBuildings
 Software Developer Intern (Python)-IMT Insurance
 Software Developer Intern (C#)-IMT Insurance
+Website Developer Intern-Studio Alumbra
+Software Engineer - QA Analyst Intern-Motion
