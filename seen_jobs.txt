@@ -5425,3 +5425,5 @@ Salesforce Engineer Intern-Lucid Motors
 Software Engineering Intern-Hearst
 Software Engineering Intern, Simulation Technology - Summer 2027-NVIDIA
 Embedded Software Engineering Co-Op/Intern-KiddeFenwal
+Internship, Software Engineer, SI Infrastructure (Fall 2026/Winter 2027)-Tesla
+Internship, Vehicle Software Engineer, Diagnostic User Interface (Winter/Spring 2027)-Tesla
